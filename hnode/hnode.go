@@ -2,7 +2,6 @@ package hnode
 
 import (
 	"bytes"
-	"fmt"
 	"huffman-coding/models"
 	"sort"
 );
@@ -26,11 +25,6 @@ func BuildTree(text string) *HNode {
         sort.Slice(trees, func(i, j int) bool {
             return trees[i].Value.Freq < trees[j].Value.Freq
         })
-
-        for i, t := range trees {
-            fmt.Printf("%d. %s\n", i+1, string(t.Value.Value))
-        }
-        fmt.Println()
 
         l := trees[0]
         r := trees[1]
@@ -56,6 +50,10 @@ func (node *HNode) GenCodes() map[rune][]bool {
     genCodesRecusrive(node, []bool{}, codes)
     return codes
 }
+
+//TODO:
+// doesn't work for one character e.g. 'a' because the rec func gets
+//  called once, with an empty slice. (handle case)
 
 func genCodesRecusrive(node *HNode, b []bool, codes map[rune][]bool) {
     if node.Left == nil && node.Right == nil && len(node.Value.Value) == 1 {
