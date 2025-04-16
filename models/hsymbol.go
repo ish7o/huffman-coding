@@ -8,13 +8,12 @@ type HSymbol struct {
 }
 
 func (c HSymbol) Combine(other HSymbol) HSymbol {
-    return HSymbol{
-        Value: append(c.Value, other.Value...),
-        Freq:  c.Freq + other.Freq,
-    }
+	return HSymbol{
+		Value: append(c.Value, other.Value...),
+		Freq:  c.Freq + other.Freq,
+	}
 }
 
 func (c HSymbol) String() string {
 	return fmt.Sprintf("'%s': %d", string(c.Value), c.Freq)
 }
-

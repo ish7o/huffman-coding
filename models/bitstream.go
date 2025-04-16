@@ -31,8 +31,8 @@ func (b *BitStream) AppendBit(bit bool) {
 		b.Bytes = append(b.Bytes, 0)
 	}
 
-    // 00100000
-    mask := byte(1 << bitPos)
+	// 00100000
+	mask := byte(1 << bitPos)
 
 	if bit {
 		// 11000000 | 00100000
@@ -79,7 +79,7 @@ func (b *BitStream) ReadBitAt(position int) (bool, error) {
 	// byteIndex = position / 8 = 1
 	byteIndex := position / 8
 	// bitIndex = position % 8 = 3
-	bitIndex := 7 - position % 8
+	bitIndex := 7 - position%8
 
 	if position > b.BitCount {
 		return false, errors.New("bit position out of range :c")
@@ -87,17 +87,17 @@ func (b *BitStream) ReadBitAt(position int) (bool, error) {
 
 	//          11000000 & 00001000 -> 0 -> false
 	//              ^          ^
-    // fmt.Printf("b.Bytes   = %08b\nshift     = %08b\n", b.Bytes[byteIndex], 1<<bitIndex)
+	// fmt.Printf("b.Bytes   = %08b\nshift     = %08b\n", b.Bytes[byteIndex], 1<<bitIndex)
 	return b.Bytes[byteIndex]&(1<<bitIndex) != 0, nil
 }
 
 func (b *BitStream) Value() string {
-    if b.BitCount == 0 {
-        return ""
-    }
+	if b.BitCount == 0 {
+		return ""
+	}
 
-    var sb strings.Builder
-    sb.Grow(b.BitCount)
+	var sb strings.Builder
+	sb.Grow(b.BitCount)
 
 	for i := range b.BitCount {
 		bit, _ := b.ReadBitAt(i)
@@ -112,10 +112,9 @@ func (b *BitStream) Value() string {
 }
 
 func (b *BitStream) String() string {
-    if b.BitCount == 0 {
-        return "BitStream <empty>"
-    }
+	if b.BitCount == 0 {
+		return "BitStream <empty>"
+	}
 
-    return fmt.Sprintf("%s (%d)", b.Value(), b.BitCount)
+	return fmt.Sprintf("%s (%d)", b.Value(), b.BitCount)
 }
-

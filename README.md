@@ -1,5 +1,11 @@
 # Huffman coding
 
+## Important resources
+- for everything https://en.wikipedia.org/wiki/Huffman_coding
+- for weird https://en.wikipedia.org/wiki/Canonical_Huffman_code
+- for zip https://pkware.cachefly.net/webdocs/casestudies/APPNOTE.TXT
+- for storing tree (VERY IMPORTANT) https://stackoverflow.com/questions/759707/efficient-way-of-storing-huffman-tree
+
 ## How it works (stolen from wiki)
 
 Given string:
