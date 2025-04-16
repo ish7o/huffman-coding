@@ -1,26 +1,18 @@
 package main
 
 import (
-	"fmt"
-	"huffman-coding/hnode"
+    "fmt"
+    "huffman-coding/hnode"
 )
 
 func main() {
-    text := "A_DEAD_DAD_CEDED_A_BAD_BABE_A_BEADED_ABACA_BED"
+    text := "abac"
 
     tree := hnode.BuildTree(text)
-    // hnode.PrettyPrint(tree, "", "")
+    hnode.PrettyPrint(tree, "", "")
 
     for r, b := range tree.Coding {
-        fmt.Printf("%q: ", r)
-        for _, bit := range b {
-            if bit {
-                fmt.Print("1")
-            } else {
-                fmt.Print("0")
-            }
-        }
-        fmt.Println()
+        fmt.Printf("%q: %s\n", r, b)
     }
 
     var result string
