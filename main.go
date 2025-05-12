@@ -3,10 +3,24 @@ package main
 import (
 	"fmt"
 	"huffman-coding/hnode"
+	"huffman-coding/models"
+	"strings"
 )
 
+func byteConv(bytes []byte) string {
+    var sb strings.Builder
+    sb.Grow(len(bytes) * 8)
+
+    for _, bt := range bytes {
+        sb.WriteString(fmt.Sprintf("%08b", bt))
+    }
+
+    return sb.String()
+}
+
 func main() {
-	text := "abac"
+	text := "“uwuuwuuwuuwuuwu“"
+	// text := "aba"
 
 	tree := hnode.BuildTree(text)
 	hnode.PrettyPrint(tree, "", "")
@@ -15,8 +29,19 @@ func main() {
 		fmt.Printf("%q: %s\n", r, b)
 	}
 
-	var result string
+	var result models.BitStream
+
+	// 01100010
+	// 		2 + 32 + 64
 	tree.Encode(&result)
-	fmt.Printf("I: '%s'\n", text)
-	fmt.Printf("O: '%s'\n", result)
+
+	fmt.Printf("I: '%s' (%d bytes)\n", text, len(text))
+    fmt.Printf("O: 0b%v (%d bits)\n", byteConv(result.Bytes), result.BitCount)
+    fmt.Printf("Compressed (%.3f)\n", float64(len(text)) / float64(result.BitCount * 8))
+
+	decoded, _ := tree.Decode(&result)
+	fmt.Printf("Decoded: '%s' (%d bytes)\n", decoded, len(decoded))
+
+	serialized := tree.SerializeTree()
+	fmt.Printf("serialized: %v\n", serialized)
 }

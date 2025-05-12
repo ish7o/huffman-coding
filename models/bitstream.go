@@ -118,3 +118,57 @@ func (b *BitStream) String() string {
 
 	return fmt.Sprintf("%s (%d)", b.Value(), b.BitCount)
 }
+
+func (b *BitStream) AppendBits(bits ...bool) {
+	for _, bit := range bits {
+		b.AppendBit(bit)
+	}
+}
+
+func (b *BitStream) AppendInt(num uint32, length int) {
+	// fmt.Printf("CALL AppendInt(%d, %d)\n", num, length)
+	bits := make([]bool, 0, length) // len 0 ale preallocated na <length>
+
+	for range length {
+		bits = append(bits, false)
+	}
+
+
+	for i := range length {
+		// num & 1<length - i - 1>
+		// 10, 4
+		// 1010 & 1000
+		// 		  x123
+		// 1010 & 100
+		// 1010 & 10
+
+		// fmt.Printf("%b [%d]\n", v, count)
+		if num & (1 << (length - i - 1)) != 0 {
+			// fmt.Printf("Appending %d\n", v)
+			bits[i] = true
+		}
+	}
+
+	b.AppendBits(bits...)
+}
+
+func (b *BitStream) AppendNBits(bit bool, n uint32) {
+	for range n {
+		b.AppendBit(bit)
+	}
+}
+
+func (b *BitStream) AppendBitStream(other *BitStream) error {
+	// for future me, this is a bad way because what if it breaks in the middle
+	// change to it making a slice and then appending that or something, at the end, yk
+	for i := range other.BitCount {
+		v, err := other.ReadBitAt(i)
+		if err != nil {
+			return err
+		}
+		// fmt.Printf("v: %t\n", v)
+		b.AppendBit(v)
+	}
+
+	return nil
+}

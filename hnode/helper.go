@@ -16,3 +16,7 @@ func PrettyPrint(btree *HNode, indent, prefix string) {
 func (b HNode) String() string {
 	return fmt.Sprintf("\nL: {%v}\nR: {%v}\nV: {%v}\n", b.Left, b.Right, b.Value)
 }
+
+func isLeaf(node *HNode) bool {
+	return node.Left == nil && node.Right == nil && len(node.Value.Value) == 1
+}
