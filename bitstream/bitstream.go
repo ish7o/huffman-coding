@@ -1,4 +1,4 @@
-package models
+package bitstream
 
 import (
 	"errors"

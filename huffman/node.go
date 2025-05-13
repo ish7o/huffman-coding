@@ -1,25 +1,25 @@
-package hnode
+package huffman
 
 import (
 	"fmt"
-	"huffman-coding/models"
+	"huffman-coding/bitstream"
 	"sort"
 	"unicode/utf8"
 )
 
-type HNode struct {
-	Left   *HNode
-	Right  *HNode
-	Value  models.HSymbol
-	Coding map[rune]*models.BitStream
+type Node struct {
+	Left   *Node
+	Right  *Node
+	Value  Symbol
+	Coding map[rune]*bitstream.BitStream
 	text   string
 }
 
-func BuildTree(text string) *HNode {
+func BuildTree(text string) *Node {
 	chars := textToSymbols(text)
-	trees := make([]*HNode, len(chars))
+	trees := make([]*Node, len(chars))
 	for i, char := range chars {
-		trees[i] = &HNode{Value: char}
+		trees[i] = &Node{Value: char}
 	}
 
 	for len(trees) > 1 {
@@ -30,7 +30,7 @@ func BuildTree(text string) *HNode {
 		l := trees[0]
 		r := trees[1]
 
-		comb := &HNode{
+		comb := &Node{
 			Left:  l,
 			Right: r,
 			Value: l.Value.Combine(r.Value),
@@ -46,9 +46,9 @@ func BuildTree(text string) *HNode {
 	return t
 }
 
-func (node *HNode) GenCodes() map[rune]*models.BitStream {
-	codes := make(map[rune]*models.BitStream)
-	genCodesRecusrive(node, models.NewBitStream(), codes)
+func (node *Node) GenCodes() map[rune]*bitstream.BitStream{
+	codes := make(map[rune]*bitstream.BitStream)
+	genCodesRecusrive(node, bitstream.NewBitStream(), codes)
 	return codes
 }
 
@@ -56,7 +56,7 @@ func (node *HNode) GenCodes() map[rune]*models.BitStream {
 // doesn't work for one character e.g. 'a' because the rec func gets
 //  called once, with an empty slice. (handle case)
 
-func genCodesRecusrive(node *HNode, bs *models.BitStream, codes map[rune]*models.BitStream) {
+func genCodesRecusrive(node *Node, bs *bitstream.BitStream, codes map[rune]*bitstream.BitStream) {
 	if isLeaf(node) {
 		codes[node.Value.Value[0]] = bs.Clone()
 		return
@@ -75,22 +75,22 @@ func genCodesRecusrive(node *HNode, bs *models.BitStream, codes map[rune]*models
 	}
 }
 
-func textToSymbols(text string) []models.HSymbol {
+func textToSymbols(text string) []Symbol {
 	m := make(map[rune]int)
 	for _, c := range text {
 		m[c]++
 	}
 
-	var chars []models.HSymbol
+	var chars []Symbol
 	for char, count := range m {
-		chars = append(chars, models.HSymbol{Value: []rune{char}, Freq: count})
+		chars = append(chars, Symbol{Value: []rune{char}, Freq: count})
 	}
 
 	return chars
 }
 
-func (node *HNode) Encode(result *models.BitStream) error {
-	bitStream := models.NewBitStream()
+func (node *Node) Encode(result *bitstream.BitStream) error {
+	bitStream := bitstream.NewBitStream()
 
 	for _, c := range node.text {
 		if bs, ok := node.Coding[c]; !ok {
@@ -107,8 +107,8 @@ func (node *HNode) Encode(result *models.BitStream) error {
 	return nil
 }
 
-func (node *HNode) SerializeTree() *models.BitStream {
-	bs := models.NewBitStream()
+func (node *Node) SerializeTree() *bitstream.BitStream {
+	bs := bitstream.NewBitStream()
 
 	if isLeaf(node) {
 		// Means this is a leaf node thing
@@ -147,14 +147,14 @@ func (node *HNode) SerializeTree() *models.BitStream {
 	return bs
 }
 
-func (node *HNode) Decode(encoded *models.BitStream) (string, error) {
+func (node *Node) Decode(encoded *bitstream.BitStream) (string, error) {
 	reverseMap := make(map[string]rune)
 	for r, bs := range node.Coding {
 		reverseMap[bs.String()] = r
 	}
 
 	var result []rune
-	curr := models.NewBitStream()
+	curr := bitstream.NewBitStream()
 
 	for i := range encoded.BitCount {
 		bit, _ := encoded.ReadBitAt(i)
@@ -162,20 +162,9 @@ func (node *HNode) Decode(encoded *models.BitStream) (string, error) {
 
 		if r, ok := reverseMap[curr.String()]; ok {
 			result = append(result, r)
-			curr = models.NewBitStream()
+			curr = bitstream.NewBitStream()
 		}
 	}
 
 	return string(result), nil
 }
-
-// func (node *HNode) EncodeTree(result *models.BitStream) error {
-// 	bs := models.NewBitStream()
-//
-// 	if isLeaf(node) {
-// 		bs.AppendBit(true)
-// 		v := node.Value.Value[0]
-// 	}
-//
-// 	return nil
-// }

@@ -2,12 +2,12 @@ package main
 
 import (
 	"fmt"
-	"huffman-coding/models"
+	"huffman-coding/bitstream"
 )
 
 func main() {
-	bs := models.NewBitStream()
-	bs2 := models.NewBitStream()
+	bs := bitstream.NewBitStream()
+	bs2 := bitstream.NewBitStream()
 
 	bs.AppendNBits(true, 3)
 	bs.AppendBit(false)

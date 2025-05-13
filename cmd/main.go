@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"huffman-coding/hnode"
-	"huffman-coding/models"
+	"huffman-coding/bitstream"
+	"huffman-coding/huffman"
 	"strings"
 )
 
@@ -22,14 +22,14 @@ func main() {
 	text := "“uwuuwuuwuuwuuwu“"
 	// text := "aba"
 
-	tree := hnode.BuildTree(text)
-	hnode.PrettyPrint(tree, "", "")
+	tree := huffman.BuildTree(text)
+	huffman.PrettyPrint(tree, "", "")
 
 	for r, b := range tree.Coding {
 		fmt.Printf("%q: %s\n", r, b)
 	}
 
-	var result models.BitStream
+	var result bitstream.BitStream
 
 	// 01100010
 	// 		2 + 32 + 64

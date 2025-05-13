@@ -1,8 +1,8 @@
-package hnode
+package huffman
 
 import "fmt"
 
-func PrettyPrint(btree *HNode, indent, prefix string) {
+func PrettyPrint(btree *Node, indent, prefix string) {
 	if btree == nil {
 		fmt.Printf("%s%s(nil)\n", indent, prefix)
 		return
@@ -13,10 +13,10 @@ func PrettyPrint(btree *HNode, indent, prefix string) {
 	PrettyPrint(btree.Right, indent+"    ", "R -> ")
 }
 
-func (b HNode) String() string {
+func (b Node) String() string {
 	return fmt.Sprintf("\nL: {%v}\nR: {%v}\nV: {%v}\n", b.Left, b.Right, b.Value)
 }
 
-func isLeaf(node *HNode) bool {
+func isLeaf(node *Node) bool {
 	return node.Left == nil && node.Right == nil && len(node.Value.Value) == 1
 }
