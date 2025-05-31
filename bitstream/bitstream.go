@@ -18,6 +18,10 @@ func NewBitStream() *BitStream {
 	}
 }
 
+func (b *BitStream) NewReader() *BitReader {
+	return NewBitReader(b)
+}
+
 func (b *BitStream) AppendBit(bit bool) {
 	// [11100111, 10011011, 11000000]; bitCount=18
 	//                        ^
@@ -81,7 +85,7 @@ func (b *BitStream) ReadBitAt(position int) (bool, error) {
 	// bitIndex = position % 8 = 3
 	bitIndex := 7 - position%8
 
-	if position > b.BitCount {
+	if position >= b.BitCount {
 		return false, errors.New("bit position out of range :c")
 	}
 
@@ -158,7 +162,7 @@ func (b *BitStream) AppendNBits(bit bool, n uint32) {
 	}
 }
 
-func (b *BitStream) AppendBitStream(other *BitStream) error {
+func (b *BitStream) Add(other *BitStream) error {
 	// for future me, this is a bad way because what if it breaks in the middle
 	// change to it making a slice and then appending that or something, at the end, yk
 	for i := range other.BitCount {

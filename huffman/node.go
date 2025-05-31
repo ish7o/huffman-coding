@@ -46,7 +46,7 @@ func BuildTree(text string) *Node {
 	return t
 }
 
-func (node *Node) GenCodes() map[rune]*bitstream.BitStream{
+func (node *Node) GenCodes() map[rune]*bitstream.BitStream {
 	codes := make(map[rune]*bitstream.BitStream)
 	genCodesRecusrive(node, bitstream.NewBitStream(), codes)
 	return codes
@@ -118,13 +118,19 @@ func (node *Node) SerializeTree() *bitstream.BitStream {
 			buf := make([]byte, 4)
 			n := utf8.EncodeRune(buf, r)
 			utf8bytes := buf[:n]
+			fmt.Printf("UTF: %s -> ", string(node.Value.Value))
+			for _, b := range utf8bytes {
+				fmt.Printf("%d %08b", b, b)
+			}
+			fmt.Println()
 
 			// Length (2 bits)
-			bs.AppendInt(uint32(n-1), 2)
+			// bs.AppendInt(uint32(n-1), 2)
 
 			// BYTES BYTES BYTES BYTES or byte actually
 			for _, b := range utf8bytes {
 				bs.AppendInt(uint32(b), 8)
+				fmt.Printf("bs: %v\n", bs)
 			}
 		}
 	} else {
@@ -132,14 +138,14 @@ func (node *Node) SerializeTree() *bitstream.BitStream {
 		// i mean, recursive panicking is fun, right...
 		bs.AppendBit(false)
 		l := node.Left.SerializeTree()
-		fmt.Printf("l: %v\n", l)
-		if err := bs.AppendBitStream(l); err != nil {
+		// fmt.Printf("l: %v\n", l)
+		if err := bs.Add(l); err != nil {
 			// TODO: dont panic.
 			panic(err)
 		}
 		r := node.Right.SerializeTree()
-		fmt.Printf("r: %v\n", r)
-		if err := bs.AppendBitStream(r); err != nil {
+		// fmt.Printf("r: %v\n", r)
+		if err := bs.Add(r); err != nil {
 			panic(err)
 		}
 

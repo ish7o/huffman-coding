@@ -19,7 +19,7 @@ func byteConv(bytes []byte) string {
 }
 
 func main() {
-	text := "“uwuuwuuwuuwuuwu“"
+	text := "“ab“"
 	// text := "aba"
 
 	tree := huffman.BuildTree(text)
@@ -44,4 +44,13 @@ func main() {
 
 	serialized := tree.SerializeTree()
 	fmt.Printf("serialized: %v\n", serialized)
+
+	deserialized, err := huffman.DeserializeTree(serialized.NewReader())
+	if err != nil {
+		panic(err)
+	}
+
+
+	fmt.Printf("deserialized: %v\n", deserialized)
+
 }
