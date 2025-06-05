@@ -4,22 +4,22 @@ import (
 	"errors"
 	"fmt"
 	"huffman-coding/bitstream"
-	"strings"
+	// "strings"
 	"unicode/utf8"
 )
 
-func printBytes(bytes []byte, idx int) {
-	fmt.Println("TL765432107654321076543210TL76543210L76543210")
-	for _, b := range bytes {
-		fmt.Printf("%08b", b)
-	}
-	fmt.Println()
-	fmt.Printf("%s^ (%d)\n", strings.Repeat(" ", idx), idx)
-}
+//	func printBytes(bytes []byte, idx int) {
+//		fmt.Println("TL765432107654321076543210TL76543210L76543210")
+//		for _, b := range bytes {
+//			fmt.Printf("%08b", b)
+//		}
+//		fmt.Println()
+//		fmt.Printf("%s^ (%d)\n", strings.Repeat(" ", idx), idx)
+//	}
 
-func DeserializeTree(br *bitstream.BitReader) (*Node, error) {
+func DeserializeTree(br bitstream.Reader) (*Node, error) {
 	// fmt.Printf("br.Bytes: %v\n", br.Bytes)
-	printBytes(br.Bytes, br.ReadIdx)
+	// printBytes(br.Bytes, br.ReadIdx)
 	// 011110001010000000100111000101100001101100010
 	// TL765432107654321076543210TL76543210L76543210
 
@@ -69,26 +69,37 @@ func DeserializeTree(br *bitstream.BitReader) (*Node, error) {
 			return nil, err
 		}
 		fmt.Printf("r: %v\n", string(r))
+		node.Value = Symbol{
+			Value: []rune{r},
+		}
+
 		// if tree node
 		// parse left node
 		// parse right node
 		// put them as kids to node
 	} else {
 		fmt.Println("first = false")
-		fmt.Printf("readIdx: %d\n", br.ReadIdx)
-		_, err := DeserializeTree(br)
+		// fmt.Printf("readIdx: %d\n", br.ReadIdx)
+		n, err := DeserializeTree(br)
 		if err != nil {
 			return nil, err
 		}
-		fmt.Printf("readIdx: %d\n", br.ReadIdx)
-		_, err = DeserializeTree(br)
+		node.Left = n
+		// fmt.Printf("n: %v\n", n)
+		// fmt.Printf("readIdx: %d\n", br.ReadIdx)
+		n, err = DeserializeTree(br)
 		if err != nil {
 			return nil, err
 		}
+		node.Right = n
+
+		node.Value.Value = append(node.Left.Value.Value, node.Right.Value.Value...)
+		// fmt.Printf("n: %v\n", n)
+		// fmt.Println("---")
 	}
 
-	fmt.Printf("done\n")
-	printBytes(br.Bytes, br.ReadIdx)
+	// fmt.Printf("done\n")
+	// printBytes(br.Bytes, br.ReadIdx)
 	// _, _ = br.Read()
 
 	return node, nil
@@ -113,12 +124,17 @@ func DeserializeTree(br *bitstream.BitReader) (*Node, error) {
 // 	}
 // }
 
-func readChar(br *bitstream.BitReader) (rune, error) {
+// taka notka
+// mam wrazenie ze nie czytam 1 gdy mam leaf node
+// dlatego
+// a w sumie nie wiem
+// dziwne jakies to
+func readChar(br bitstream.Reader) (rune, error) {
 	newBS := bitstream.NewBitStream()
 	byteCount := 0
 	for {
 		b, err := br.Read()
-		fmt.Printf("reading bit: %v\n", b)
+		// fmt.Printf("reading bit: %v\n", b)
 		if err != nil {
 			return ' ', err
 		}
@@ -131,7 +147,7 @@ func readChar(br *bitstream.BitReader) (rune, error) {
 	}
 	newBS.AppendBit(false)
 
-	fmt.Printf("newBS: %v\n", newBS)
+	// fmt.Printf("newBS: %v\n", newBS)
 
 	// grab the rest of first byte
 	bCount := byteCount
@@ -144,8 +160,8 @@ func readChar(br *bitstream.BitReader) (rune, error) {
 		bCount++
 	}
 
-	fmt.Printf("newBS: %v\n", newBS)
-	fmt.Printf("byteCount: %v\n", byteCount)
+	// fmt.Printf("newBS: %v\n", newBS)
+	// fmt.Printf("byteCount: %v\n", byteCount)
 	if byteCount == 1 {
 		for range 6 { // 6 bo czytam ten o dlugosci i ten false potem
 			b, err := br.Read()
@@ -153,7 +169,7 @@ func readChar(br *bitstream.BitReader) (rune, error) {
 				return ' ', err
 			}
 			newBS.AppendBit(b)
-			fmt.Printf("bC = 0 and newBS: %v\n", newBS)
+			// fmt.Printf("bC = 0 and newBS: %v\n", newBS)
 		}
 	} else {
 
@@ -170,9 +186,9 @@ func readChar(br *bitstream.BitReader) (rune, error) {
 	}
 
 	r, _ := utf8.DecodeRune(newBS.Bytes)
-	fmt.Printf("utf8.DecodeRune -> r: %v\n", r)
+	// fmt.Printf("utf8.DecodeRune -> r: %v\n", r)
 
-	fmt.Printf("newBS: %v\n", newBS)
+	// fmt.Printf("newBS: %v\n", newBS)
 
 	return r, nil
 }

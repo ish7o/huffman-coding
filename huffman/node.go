@@ -1,8 +1,9 @@
 package huffman
 
 import (
-	"fmt"
+	"bufio"
 	"huffman-coding/bitstream"
+	"io"
 	"sort"
 	"unicode/utf8"
 )
@@ -15,11 +16,10 @@ type Node struct {
 	text   string
 }
 
-func BuildTree(text string) *Node {
-	chars := textToSymbols(text)
-	trees := make([]*Node, len(chars))
-	for i, char := range chars {
-		trees[i] = &Node{Value: char}
+func BuildTree(freq map[rune]int) *Node {
+	var trees []*Node
+	for r, f := range freq {
+		trees = append(trees, &Node{Value: Symbol{Value: []rune{r}, Freq: f}})
 	}
 
 	for len(trees) > 1 {
@@ -40,7 +40,6 @@ func BuildTree(text string) *Node {
 	}
 
 	t := trees[0]
-	t.text = text
 	t.Coding = t.GenCodes()
 
 	return t
@@ -89,17 +88,33 @@ func textToSymbols(text string) []Symbol {
 	return chars
 }
 
-func (node *Node) Encode(result *bitstream.BitStream) error {
+func (node *Node) Encode(result *bitstream.BitStream, reader io.Reader) error {
 	bitStream := bitstream.NewBitStream()
 
-	for _, c := range node.text {
-		if bs, ok := node.Coding[c]; !ok {
-			panic("oopsie woopsie~")
-		} else {
-			for i := range bs.BitCount {
-				bit, _ := bs.ReadBitAt(i)
-				bitStream.AppendBit(bit)
+	rd := bufio.NewReader(reader)
+
+	for {
+		c, _, err := rd.ReadRune()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			return err
+		}
+
+		bs, ok := node.Coding[c]
+
+		if !ok {
+			panic(ok)
+		}
+
+		for i := range bs.BitCount {
+			bit, err := bs.ReadBitAt(i)
+			if err != nil {
+				return err
 			}
+
+			bitStream.AppendBit(bit)
 		}
 	}
 
@@ -118,11 +133,11 @@ func (node *Node) SerializeTree() *bitstream.BitStream {
 			buf := make([]byte, 4)
 			n := utf8.EncodeRune(buf, r)
 			utf8bytes := buf[:n]
-			fmt.Printf("UTF: %s -> ", string(node.Value.Value))
-			for _, b := range utf8bytes {
-				fmt.Printf("%d %08b", b, b)
-			}
-			fmt.Println()
+			// fmt.Printf("UTF: %s -> ", string(node.Value.Value))
+			// for _, b := range utf8bytes {
+				// fmt.Printf("%d %08b", b, b)
+			// }
+			// fmt.Println()
 
 			// Length (2 bits)
 			// bs.AppendInt(uint32(n-1), 2)
@@ -130,7 +145,7 @@ func (node *Node) SerializeTree() *bitstream.BitStream {
 			// BYTES BYTES BYTES BYTES or byte actually
 			for _, b := range utf8bytes {
 				bs.AppendInt(uint32(b), 8)
-				fmt.Printf("bs: %v\n", bs)
+				// fmt.Printf("bs: %v\n", bs)
 			}
 		}
 	} else {
@@ -153,7 +168,7 @@ func (node *Node) SerializeTree() *bitstream.BitStream {
 	return bs
 }
 
-func (node *Node) Decode(encoded *bitstream.BitStream) (string, error) {
+func (node *Node) Decode(encoded bitstream.Reader) ([]rune, error) {
 	reverseMap := make(map[string]rune)
 	for r, bs := range node.Coding {
 		reverseMap[bs.String()] = r
@@ -162,8 +177,17 @@ func (node *Node) Decode(encoded *bitstream.BitStream) (string, error) {
 	var result []rune
 	curr := bitstream.NewBitStream()
 
-	for i := range encoded.BitCount {
-		bit, _ := encoded.ReadBitAt(i)
+	// for i := range encoded.BitCount {
+	for {
+		bit, err := encoded.Read()
+		if err == io.EOF {
+			// return result, nil
+			break
+		}
+		if err != nil {
+			return nil, err
+		}
+		// bit, _ := encoded.ReadBitAt(i)
 		curr.AppendBit(bit)
 
 		if r, ok := reverseMap[curr.String()]; ok {
@@ -172,5 +196,5 @@ func (node *Node) Decode(encoded *bitstream.BitStream) (string, error) {
 		}
 	}
 
-	return string(result), nil
+	return result, nil
 }

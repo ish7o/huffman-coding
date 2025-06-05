@@ -1,6 +1,9 @@
 package huffman
 
-import "fmt"
+import (
+	"strconv"
+	"strings"
+)
 
 type Symbol struct {
 	Value []rune
@@ -15,5 +18,13 @@ func (c Symbol) Combine(other Symbol) Symbol {
 }
 
 func (c Symbol) String() string {
-	return fmt.Sprintf("'%s': %d", string(c.Value), c.Freq)
+	var b strings.Builder
+	b.WriteByte('\'')
+	for _, r := range c.Value {
+		// so that \n is a \n not an actual linebreak
+		s := strconv.QuoteRuneToGraphic(r)
+		b.WriteString(s[1:len(s)-1])
+	}
+	b.WriteByte('\'')
+	return b.String()
 }

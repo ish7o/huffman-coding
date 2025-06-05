@@ -6,6 +6,7 @@ import (
 )
 
 func main() {
+	// while ((c=getc(fp)) != EOF)
 	bs := bitstream.NewBitStream()
 	// bs2 := bitstream.NewBitStream()
 
