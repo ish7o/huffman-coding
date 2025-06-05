@@ -2,9 +2,7 @@ package huffman
 
 import (
 	"errors"
-	"fmt"
 	"huffman-coding/bitstream"
-	// "strings"
 	"unicode/utf8"
 )
 
@@ -63,12 +61,10 @@ func DeserializeTree(br bitstream.Reader) (*Node, error) {
 	// if is leaf node
 	// then read character and pack it to a leaf node
 	if first {
-		fmt.Println("first = true")
 		r, err := readChar(br)
 		if err != nil {
 			return nil, err
 		}
-		fmt.Printf("r: %v\n", string(r))
 		node.Value = Symbol{
 			Value: []rune{r},
 		}
@@ -78,7 +74,6 @@ func DeserializeTree(br bitstream.Reader) (*Node, error) {
 		// parse right node
 		// put them as kids to node
 	} else {
-		fmt.Println("first = false")
 		// fmt.Printf("readIdx: %d\n", br.ReadIdx)
 		n, err := DeserializeTree(br)
 		if err != nil {

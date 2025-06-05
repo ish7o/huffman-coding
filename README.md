@@ -1,3 +1,17 @@
+## Prologue:
+
+| Padding bits at end | Prefix bits you write | Meaning                   |
+| ------------------- | --------------------- | ------------------------- |
+| 0                   | `11111110`            | no padding (8 valid bits) |
+| 1                   | `1111110`             | 7 valid bits              |
+| 2                   | `111110`              | 6 valid bits              |
+| 3                   | `11110`               | 5 valid bits              |
+| 4                   | `1110`                | 4 valid bits              |
+| 5                   | `110`                 | 3 valid bits              |
+| 6                   | `10`                  | 2 valid bits              |
+| 7                   | `0`                   | 1 valid bit               |
+
+
 # Huffman coding
 
 ## Important resources

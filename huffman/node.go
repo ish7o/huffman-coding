@@ -13,7 +13,6 @@ type Node struct {
 	Right  *Node
 	Value  Symbol
 	Coding map[rune]*bitstream.BitStream
-	text   string
 }
 
 func BuildTree(freq map[rune]int) *Node {
@@ -177,17 +176,14 @@ func (node *Node) Decode(encoded bitstream.Reader) ([]rune, error) {
 	var result []rune
 	curr := bitstream.NewBitStream()
 
-	// for i := range encoded.BitCount {
 	for {
 		bit, err := encoded.Read()
 		if err == io.EOF {
-			// return result, nil
 			break
 		}
 		if err != nil {
 			return nil, err
 		}
-		// bit, _ := encoded.ReadBitAt(i)
 		curr.AppendBit(bit)
 
 		if r, ok := reverseMap[curr.String()]; ok {
